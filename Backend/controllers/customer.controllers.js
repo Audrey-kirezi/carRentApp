@@ -17,7 +17,7 @@ exports.viewCustomers = (authenticateAdmin, async (req, res) => {
       if (!customer) {
         return res.status(404).json({ message: 'Customer not found' });
       }
-      await customer.remove();
+      await customer.deleteOne();
   
       res.status(200).json({ message: 'Customer removed from the database' });
     } catch (error) {

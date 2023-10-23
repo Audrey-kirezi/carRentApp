@@ -1,8 +1,11 @@
 
 import './App.css';
+import Signup from './signup'
 
 function App() {
-  return ;
+  return(
+  <Signup/>
+  );
 }
 
 export default App;

@@ -1,16 +1,20 @@
-const mongoose= require("mongoose")
-const { schema } = require("./admin.model")
-const Schema= mongoose.Schema
+const mongoose =require("mongoose")
+const  Schema= mongoose.Schema
 
-const userSchema= new Schema({
+const jsonwebtoken =require('jsonwebtoken')
+const {sign} = jsonwebtoken
 
+const userSchema = new Schema({
     username:{
         type:String,
-        required:true,
+        required:true
     },
-    phone_number:{
+   
+    phone:{
         type:String,
-        required:true,
+        minLength: 10,
+        maxLength: 10,
+        required:true
     },
     address:{
         type:String,
@@ -18,14 +22,32 @@ const userSchema= new Schema({
     },
     email:{
         type:String,
-        required:true,
-        unique:true
+        unique:true,
+        match: [/\S+@\S+\.\S+/, 'Email is invalid'],
+        required:true
     },
     password:{
         type:String,
-        required:true
+        required:true,
+        select: false
+    },
+    role:{
+        type:String,
+        enum:['admin','user'],
+        required: true,
+        select: false
     }
-})
+},
+{timestamps:true}
+)
 
-const User = mongoose.model('User', userSchema)
-module.exports = User
+userSchema.methods.generateAuthToken = function(){
+    const token = sign(
+        {_id:this._id,role: this.role},
+        (process.env.JWT).trim()
+    )
+    return token;
+}
+
+const User = mongoose.model('User',userSchema)
+module.exports=User
