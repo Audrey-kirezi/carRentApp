@@ -1,9 +1,10 @@
 const express = require('express');
-const Customer = require('../models/customer');
-const authenticateAdmin = require('../middleware/authenticateAdmin'); 
+const { viewAllUsers, removeCustomer } = require("../controllers/customer.controllers");
+const {authenticateAdmin} = require('../middleware/admin.middleware'); 
 const router = express.Router();
-router.get('/customers');
 
-router.delete('/removeCustomer/:customerId');
+router.get('/all', authenticateAdmin, viewAllUsers)
+router.delete('/removeCustomer/:userId', authenticateAdmin, removeCustomer)
 
 module.exports = router;
+

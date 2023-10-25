@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const{carRentalRequests,approveRequests,rejectRequests}=require("../controllers/carRequest.controllers")
+const { addCar, updateCar,deleteCarInfo,viewAllCars } = require('../controllers/carRequest.controllers');
+const { authenticateAdmin } = require('../middleware/admin.middleware')
 
-
-router.get('/carRequests',carRentalRequests);
-router.put('/approveRequest/:requestId',approveRequests);
-router.put('/rejectRequest/:requestId',rejectRequests);
+router.post('/add', authenticateAdmin, addCar)
+router.put('/update/:carId', authenticateAdmin, updateCar)
+router.delete('/delete/:carId', authenticateAdmin,deleteCarInfo)
+router.get('/all',viewAllCars)
 
 module.exports = router;

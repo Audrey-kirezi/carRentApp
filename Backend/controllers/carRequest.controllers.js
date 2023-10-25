@@ -1,50 +1,62 @@
-const Admin = require("../models/admin.model");
 const Car = require("../models/car.model");
-const User= require("../models/user.model")
-const CarRentalRequest = require('../models/carRentalRequest');
-const authenticateAdmin = require('../middleware/authenticateAdmin'); 
 
-exports.carRentalRequests=(authenticateAdmin, async (req, res) => {
-    try {
-      const requests = await CarRentalRequest.find().populate('user car');
-      res.status(200).json(requests);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error fetching car rental requests' });
+exports.addCar = async (req, res) => {
+  try {
+    const { carModel, carImageUrl, price } = req.body;
+    const newCar = new Car({ carModel, carImageUrl, price });
+    await newCar.save();
+    res.status(201).json(newCar);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error adding a new car" });
+  }
+};
+
+exports.updateCar = async (req, res) => {
+  try {
+    const { carId } = req.params;
+    const { carModel, carImageUrl, price } = req.body;
+    const updatedCar = await Car.findByIdAndUpdate(
+      carId,
+      { carModel, carImageUrl, price },
+      { new: true }
+    );
+
+    if (!updatedCar) {
+      return res.status(404).json({ message: "Car not found" });
     }
-  })
-  exports.approveRequests=(authenticateAdmin, async (req, res) => {
-    try {
-      const { requestId } = req.params;
-      const request = await CarRentalRequest.findById(requestId);
-  
-      if (!request) {
-        return res.status(404).json({ message: 'Request not found' });
-      }
-      request.status = 'approved';
-      await request.save();
-  
-      res.status(200).json({ message: 'Request approved successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error approving car rental request' });
+
+    res.status(200).json(updatedCar);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating car information" });
+  }
+};
+
+exports.deleteCarInfo = async (req, res) => {
+  try {
+    const { carId } = req.params;
+
+    const car = await Car.findById(carId);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
     }
-  })
-  exports.rejectRequests=(authenticateAdmin, async (req, res) => {
-    try {
-      const { requestId } = req.params;
-      const request = await CarRentalRequest.findById(requestId);
-  
-      if (!request) {
-        return res.status(404).json({ message: 'Request not found' });
-      }
-  
-      request.status = 'rejected';
-      await request.save();
-  
-      res.status(200).json({ message: 'Request rejected successfully' });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error rejecting car rental request' });
-    }
-  })
+    await car.deleteOne();
+
+    res.status(200).json({ message: "Car removed from the system" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error removing car from the system" });
+  }
+};
+
+exports.viewAllCars = async (req, res) => {
+  try {
+    const cars = await Car.find();
+    res.status(200).json(cars);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching cars" });
+  }
+};
